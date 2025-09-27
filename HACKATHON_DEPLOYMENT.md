@@ -29,11 +29,13 @@
 In Railway dashboard, go to **Variables** tab and add:
 
 ```env
-MONGODB_URI=mongodb+srv://bhuvishibansal_db_user:Ananya3722@cluster0.l8qd4yq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=your_mongodb_atlas_connection_string_here
 NODE_ENV=production
 FRONTEND_URL=https://your-vercel-url.vercel.app
 PORT=3000
 ```
+
+**⚠️ SECURITY: Use your actual MongoDB Atlas connection string (see ENV_SETUP.md)**
 
 ### **Step 3: Get Backend URL**
 - Railway will give you a URL like: `https://echo-journal-backend-production.up.railway.app`
@@ -57,7 +59,7 @@ In Vercel dashboard, go to **Environment Variables** and add:
 NEXT_PUBLIC_API_URL=https://your-railway-backend-url.up.railway.app/api
 ```
 
-**Replace `your-railway-backend-url` with your actual Railway URL!**
+**⚠️ IMPORTANT: Replace `your-railway-backend-url` with your actual Railway URL!**
 
 ### **Step 3: Deploy**
 - Click **"Deploy"**
@@ -132,9 +134,9 @@ Your Echo Journal app is now:
 - ✅ **Scalable** - Can handle multiple users
 - ✅ **Professional** - No hardcoded data, clean UI
 
-**Demo URLs:**
-- **Frontend**: `https://your-app.vercel.app`
-- **Backend API**: `https://your-backend.up.railway.app/api`
+**Demo URLs (replace with your actual URLs):**
+- **Frontend**: `https://your-app.vercel.app` (from Vercel deployment)
+- **Backend API**: `https://your-backend.up.railway.app/api` (from Railway deployment)
 - **Health Check**: `https://your-backend.up.railway.app/api/health`
 
 **Good luck at the hackathon! 🚀**

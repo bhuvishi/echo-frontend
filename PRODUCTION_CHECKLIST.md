@@ -94,7 +94,7 @@
 
 ### **Railway (Backend)**
 ```env
-MONGODB_URI=mongodb+srv://bhuvishibansal_db_user:Ananya3722@cluster0.l8qd4yq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=your_mongodb_atlas_connection_string_here
 NODE_ENV=production
 FRONTEND_URL=https://your-vercel-url.vercel.app
 PORT=3000
@@ -136,9 +136,9 @@ Your Echo Journal is now:
 - ✅ **Mobile Ready** - Responsive design
 - ✅ **Professional** - Clean, polished UI
 
-**Demo URLs:**
-- **Frontend**: `https://your-app.vercel.app`
-- **Backend**: `https://your-backend.up.railway.app`
+**Demo URLs (replace with your actual URLs):**
+- **Frontend**: `https://your-app.vercel.app` (from Vercel deployment)
+- **Backend**: `https://your-backend.up.railway.app` (from Railway deployment)
 - **Health**: `https://your-backend.up.railway.app/api/health`
 
 **Good luck at the hackathon! 🚀**

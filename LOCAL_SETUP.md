@@ -36,7 +36,7 @@ Frontend will run on: `http://localhost:3002`
 
 Your MongoDB Atlas database is already configured:
 - **Database**: `echo-journal`
-- **Connection**: `mongodb+srv://bhuvishibansal_db_user:Ananya3*7=22@cluster0.l8qd4yq.mongodb.net/echo-journal`
+- **Connection**: Your MongoDB Atlas connection string (see ENV_SETUP.md)
 
 ## 📊 Database Seeding
 
@@ -49,7 +49,7 @@ The database will be automatically seeded with:
 
 ### Backend (.env)
 ```
-MONGODB_URI=mongodb+srv://bhuvishibansal_db_user:Ananya3*7=22@cluster0.l8qd4yq.mongodb.net/echo-journal
+MONGODB_URI=your_mongodb_atlas_connection_string_here
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3002
