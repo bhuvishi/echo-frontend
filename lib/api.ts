@@ -329,3 +329,33 @@ export const handleApiError = (error: any): string => {
   }
   return 'An unexpected error occurred'
 }
+
+// Fallback data for when API is not available
+export const fallbackData = {
+  dashboard: {
+    streak: { current: 0, longest: 0 },
+    thisWeeksWord: "Growth",
+    nextMilestone: { target: 10, progress: 0.75, current: 7 },
+    weeklyMood: [
+      { day: "Mon", emoji: "🕊️", mood: 7 },
+      { day: "Tue", emoji: "🙏", mood: 8 },
+      { day: "Wed", emoji: "⚡", mood: 6 },
+      { day: "Thu", emoji: "🌙", mood: 7 },
+      { day: "Fri", emoji: "✨", mood: 9 },
+      { day: "Sat", emoji: "🌊", mood: 8 },
+      { day: "Sun", emoji: "🌟", mood: 7 }
+    ],
+    insights: { totalEntries: 0, totalWords: 0 }
+  },
+  prompt: {
+    _id: "fallback",
+    title: "Daily Reflection",
+    question: "What brought you joy today, and how did it make you feel in the moment? Sometimes the smallest moments carry the greatest meaning.",
+    category: "reflection",
+    difficulty: "beginner" as const,
+    tags: ["joy", "gratitude", "daily-life"],
+    usageCount: 0,
+    priority: 10,
+    isActive: true
+  }
+}

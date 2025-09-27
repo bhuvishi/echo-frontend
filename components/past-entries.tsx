@@ -32,6 +32,7 @@ export function PastEntries({ onBack }: PastEntriesProps) {
       } catch (err) {
         console.error('Error loading entries:', err)
         setError(handleApiError(err))
+        // Keep fallback entries when API fails
       } finally {
         setLoading(false)
       }

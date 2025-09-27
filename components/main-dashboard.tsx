@@ -16,7 +16,7 @@ import {
   Settings,
   ChevronRight,
 } from "lucide-react"
-import { analyticsAPI, promptsAPI, handleApiError } from "@/lib/api"
+import { analyticsAPI, promptsAPI, handleApiError, fallbackData } from "@/lib/api"
 import type { DashboardData, Prompt } from "@/lib/api"
 
 interface MainDashboardProps {
@@ -46,6 +46,9 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
       } catch (err) {
         console.error('Error loading dashboard data:', err)
         setError(handleApiError(err))
+        // Use fallback data when API fails
+        setDashboardData(fallbackData.dashboard)
+        setDailyPrompt(fallbackData.prompt)
       } finally {
         setLoading(false)
       }

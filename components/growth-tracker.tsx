@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, TrendingUp, Calendar, Heart, Sparkles } from "lucide-react"
-import { analyticsAPI, handleApiError } from "@/lib/api"
+import { analyticsAPI, handleApiError, fallbackData } from "@/lib/api"
 import type { Analytics } from "@/lib/api"
 
 interface GrowthTrackerProps {
@@ -35,6 +35,10 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
       } catch (err) {
         console.error('Error loading analytics data:', err)
         setError(handleApiError(err))
+        // Use fallback data when API fails
+        setMoodTimeline([])
+        setInsights([])
+        setTimeCapsules([])
       } finally {
         setLoading(false)
       }
