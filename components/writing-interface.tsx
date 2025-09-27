@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, PenTool, MessageSquare, Smile, Mic, Save, Bold, Italic, List, X } from "lucide-react"
+import { journalAPI, handleApiError } from "@/lib/api"
+import type { JournalEntry } from "@/lib/api"
 
 interface WritingInterfaceProps {
   onBack: () => void
@@ -45,10 +47,30 @@ export function WritingInterface({ onBack }: WritingInterfaceProps) {
     { key: "challenges", question: "Any challenges today?" },
   ]
 
-  const handleSave = () => {
-    // Save logic here
-    console.log("Saving entry...", { activeMode, content, selectedEmojis, quickAnswers })
-    onBack()
+  const handleSave = async () => {
+    try {
+      const entryData: Partial<JournalEntry> = {
+        content,
+        title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+        mood: selectedEmojis[0] || '😌',
+        moodScore: 5, // Default mood score
+        entryType: activeMode === 'write' ? 'free-write' : 
+                  activeMode === 'quick' ? 'quick-thoughts' :
+                  activeMode === 'emojis' ? 'emojis' : 'voice',
+        tags: [], // Could be extracted from content or user input
+        quickAnswers: activeMode === 'quick' ? quickAnswers : undefined,
+        selectedEmojis: activeMode === 'emojis' ? selectedEmojis : undefined,
+        isDraft: false,
+        isPrivate: true
+      }
+
+      await journalAPI.createEntry(entryData)
+      console.log("Entry saved successfully!")
+      onBack()
+    } catch (error) {
+      console.error("Error saving entry:", error)
+      alert(handleApiError(error))
+    }
   }
 
   const hasContent =

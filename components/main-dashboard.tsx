@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {
@@ -16,6 +16,8 @@ import {
   Settings,
   ChevronRight,
 } from "lucide-react"
+import { analyticsAPI, promptsAPI, handleApiError } from "@/lib/api"
+import type { DashboardData, Prompt } from "@/lib/api"
 
 interface MainDashboardProps {
   onNavigate: (screen: "writing" | "growth" | "entries" | "profile") => void
@@ -25,15 +27,42 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
   const [currentTime] = useState(new Date())
   const isEvening = currentTime.getHours() >= 18
   const [selectedFrequency, setSelectedFrequency] = useState<string>("")
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [dailyPrompt, setDailyPrompt] = useState<Prompt | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const moodData = [
-    { day: "Mon", emoji: "🕊️" },
-    { day: "Tue", emoji: "🙏" },
-    { day: "Wed", emoji: "⚡" },
-    { day: "Thu", emoji: "🌙" },
-    { day: "Fri", emoji: "✨" },
-    { day: "Sat", emoji: "🌊" },
-    { day: "Sun", emoji: "🌟" },
+  // Load dashboard data on component mount
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true)
+        const [dashboard, prompt] = await Promise.all([
+          analyticsAPI.getDashboardData(),
+          promptsAPI.getDailyPrompt()
+        ])
+        setDashboardData(dashboard)
+        setDailyPrompt(prompt)
+      } catch (err) {
+        console.error('Error loading dashboard data:', err)
+        setError(handleApiError(err))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDashboardData()
+  }, [])
+
+  // Fallback mood data if API fails
+  const moodData = dashboardData?.weeklyMood || [
+    { day: "Mon", emoji: "🕊️", mood: 7 },
+    { day: "Tue", emoji: "🙏", mood: 8 },
+    { day: "Wed", emoji: "⚡", mood: 6 },
+    { day: "Thu", emoji: "🌙", mood: 7 },
+    { day: "Fri", emoji: "✨", mood: 9 },
+    { day: "Sat", emoji: "🌊", mood: 8 },
+    { day: "Sun", emoji: "🌟", mood: 7 },
   ]
 
   return (
@@ -61,7 +90,9 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 glass-effect px-4 py-2 rounded-full shadow-lg">
               <Sparkles className="w-4 h-4 text-teal-300" />
-              <span className="text-sm font-medium font-mono">7 day streak</span>
+              <span className="text-sm font-medium font-mono">
+                {dashboardData?.streak.current || 0} day streak
+              </span>
             </div>
 
             <Button
@@ -89,10 +120,21 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
             </div>
 
             <div className="bg-gradient-to-r from-teal-400/10 to-purple-400/10 p-6 rounded-xl border border-slate-600/30">
-              <p className="text-lg text-slate-200 italic leading-relaxed font-mono">
-                "What brought you joy today, and how did it make you feel in the moment? Sometimes the smallest moments
-                carry the greatest meaning."
-              </p>
+              {loading ? (
+                <div className="animate-pulse">
+                  <div className="h-4 bg-slate-600/30 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-600/30 rounded w-3/4"></div>
+                </div>
+              ) : dailyPrompt ? (
+                <p className="text-lg text-slate-200 italic leading-relaxed font-mono">
+                  "{dailyPrompt.question}"
+                </p>
+              ) : (
+                <p className="text-lg text-slate-200 italic leading-relaxed font-mono">
+                  "What brought you joy today, and how did it make you feel in the moment? Sometimes the smallest moments
+                  carry the greatest meaning."
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -175,7 +217,7 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-slate-300">This Week's Word</h3>
               <p className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-purple-400 bg-clip-text text-transparent">
-                Growth
+                {dashboardData?.thisWeeksWord || "Growth"}
               </p>
             </div>
           </Card>
@@ -184,9 +226,16 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-slate-300">Next Milestone</h3>
               <div className="space-y-2">
-                <p className="text-sm text-slate-400">10 day streak</p>
+                <p className="text-sm text-slate-400">
+                  {dashboardData?.nextMilestone.target || 10} day streak
+                </p>
                 <div className="w-full bg-slate-700/50 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-teal-400 to-purple-400 h-2 rounded-full w-3/4" />
+                  <div 
+                    className="bg-gradient-to-r from-teal-400 to-purple-400 h-2 rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${(dashboardData?.nextMilestone.progress || 0.75) * 100}%` 
+                    }}
+                  />
                 </div>
               </div>
             </div>

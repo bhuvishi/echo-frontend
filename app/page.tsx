@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { AuthScreen } from "@/components/auth-screen"
+import { useState, useEffect } from "react"
 import { OnboardingFlow } from "@/components/onboarding-flow"
 import { MainDashboard } from "@/components/main-dashboard"
 import { WritingInterface } from "@/components/writing-interface"
@@ -11,23 +10,27 @@ import { ProfileSettings } from "@/components/profile-settings"
 
 export default function EchoJournal() {
   const [currentScreen, setCurrentScreen] = useState<
-    "auth" | "onboarding" | "dashboard" | "writing" | "growth" | "entries" | "profile"
-  >("auth")
+    "onboarding" | "dashboard" | "writing" | "growth" | "entries" | "profile"
+  >("onboarding")
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false)
 
-  const handleAuthComplete = () => {
-    setCurrentScreen("onboarding")
-  }
+  // Check if onboarding was completed previously
+  useEffect(() => {
+    const completed = localStorage.getItem('echo-onboarding-complete')
+    if (completed === 'true') {
+      setIsOnboardingComplete(true)
+      setCurrentScreen("dashboard")
+    }
+  }, [])
 
   const handleOnboardingComplete = () => {
     setIsOnboardingComplete(true)
+    localStorage.setItem('echo-onboarding-complete', 'true')
     setCurrentScreen("dashboard")
   }
 
   const renderScreen = () => {
     switch (currentScreen) {
-      case "auth":
-        return <AuthScreen onComplete={handleAuthComplete} />
       case "onboarding":
         return <OnboardingFlow onComplete={handleOnboardingComplete} />
       case "dashboard":

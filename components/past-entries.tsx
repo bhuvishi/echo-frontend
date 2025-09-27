@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ArrowLeft, Search, Filter, Calendar, Smile, PenTool, Mic } from "lucide-react"
+import { journalAPI, handleApiError } from "@/lib/api"
+import type { JournalEntry } from "@/lib/api"
 
 interface PastEntriesProps {
   onBack: () => void
@@ -13,57 +15,70 @@ interface PastEntriesProps {
 export function PastEntries({ onBack }: PastEntriesProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFilter, setSelectedFilter] = useState<"all" | "mood" | "date" | "type">("all")
+  const [entries, setEntries] = useState<JournalEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
 
-  const entries = [
+  // Load entries on component mount
+  useEffect(() => {
+    const loadEntries = async () => {
+      try {
+        setLoading(true)
+        const response = await journalAPI.getEntries(page, 10, {})
+        setEntries(response.entries)
+        setHasMore(response.pagination.page < response.pagination.pages)
+      } catch (err) {
+        console.error('Error loading entries:', err)
+        setError(handleApiError(err))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadEntries()
+  }, [page])
+
+  // Fallback entries if API fails
+  const fallbackEntries = [
     {
-      id: 1,
-      date: "2024-01-07",
-      type: "text",
-      mood: "grateful",
-      moodColor: "bg-green-400",
-      preview:
-        "Today I realized how much I've grown in the past year. The challenges that once seemed impossible now feel like stepping stones...",
-      wordCount: 247,
+      _id: "1",
+      content: "Today I realized how much I've grown in the past year. The challenges that once seemed impossible now feel like stepping stones...",
+      title: "Growth Reflection",
+      mood: "😊",
+      moodScore: 8,
+      entryType: "free-write" as const,
       tags: ["growth", "reflection", "gratitude"],
+      wordCount: 247,
+      createdAt: "2024-01-07T00:00:00Z",
+      updatedAt: "2024-01-07T00:00:00Z",
+      isDraft: false,
+      isPrivate: true
     },
     {
-      id: 2,
-      date: "2024-01-06",
-      type: "emoji",
-      mood: "peaceful",
-      moodColor: "bg-blue-400",
-      preview: "😌 🌅 ☕ 📚 🧘‍♀️ 🌱 ✨",
-      wordCount: 0,
+      _id: "2", 
+      content: "😌 🌅 ☕ 📚 🧘‍♀️ 🌱 ✨",
+      title: "Morning Vibes",
+      mood: "😌",
+      moodScore: 7,
+      entryType: "emojis" as const,
       tags: ["morning", "peace", "routine"],
-    },
-    {
-      id: 3,
-      date: "2024-01-05",
-      type: "quick",
-      mood: "excited",
-      moodColor: "bg-yellow-400",
-      preview:
-        "Feeling: Energized and ready for new challenges. Grateful for: My supportive family and the opportunity to learn...",
-      wordCount: 89,
-      tags: ["energy", "family", "learning"],
-    },
-    {
-      id: 4,
-      date: "2024-01-04",
-      type: "voice",
-      mood: "thoughtful",
-      moodColor: "bg-purple-400",
-      preview: "Voice note: 3:24 - Reflecting on the conversation with mom about finding balance...",
       wordCount: 0,
-      tags: ["family", "balance", "conversation"],
-    },
+      createdAt: "2024-01-06T00:00:00Z",
+      updatedAt: "2024-01-06T00:00:00Z",
+      isDraft: false,
+      isPrivate: true
+    }
   ]
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "text":
+  const displayEntries = entries.length > 0 ? entries : fallbackEntries
+
+  const getTypeIcon = (entryType: string) => {
+    switch (entryType) {
+      case "free-write":
         return PenTool
-      case "emoji":
+      case "emojis":
         return Smile
       case "voice":
         return Mic
@@ -72,9 +87,25 @@ export function PastEntries({ onBack }: PastEntriesProps) {
     }
   }
 
-  const filteredEntries = entries.filter(
+  const getMoodColor = (mood: string) => {
+    const moodColors: { [key: string]: string } = {
+      "😊": "bg-green-400",
+      "😌": "bg-blue-400", 
+      "😢": "bg-blue-600",
+      "😡": "bg-red-400",
+      "🤔": "bg-yellow-400",
+      "✨": "bg-purple-400",
+      "🌟": "bg-yellow-300",
+      "🦋": "bg-pink-400",
+      "🕊️": "bg-indigo-400",
+      "🌱": "bg-green-300"
+    }
+    return moodColors[mood] || "bg-slate-400"
+  }
+
+  const filteredEntries = displayEntries.filter(
     (entry) =>
-      entry.preview.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      entry.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
@@ -132,59 +163,85 @@ export function PastEntries({ onBack }: PastEntriesProps) {
 
         {/* Entries Timeline */}
         <div className="space-y-4">
-          {filteredEntries.map((entry) => {
-            const TypeIcon = getTypeIcon(entry.type)
-
-            return (
-              <Card
-                key={entry.id}
-                className="p-6 bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm hover:bg-slate-700/30 transition-all duration-300 cursor-pointer group"
-              >
-                <div className="space-y-4">
-                  {/* Entry Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="p-6 bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
+                  <div className="animate-pulse space-y-4">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${entry.moodColor}`} />
-                        <span className="text-sm text-slate-400">
-                          {new Date(entry.date).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </span>
+                        <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
+                        <div className="h-4 bg-slate-600 rounded w-32"></div>
+                      </div>
+                      <div className="h-4 bg-slate-600 rounded w-16"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-slate-600 rounded w-full"></div>
+                      <div className="h-4 bg-slate-600 rounded w-3/4"></div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <div className="h-6 bg-slate-600 rounded-full w-16"></div>
+                      <div className="h-6 bg-slate-600 rounded-full w-20"></div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            filteredEntries.map((entry) => {
+              const TypeIcon = getTypeIcon(entry.entryType)
+
+              return (
+                <Card
+                  key={entry._id}
+                  className="p-6 bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm hover:bg-slate-700/30 transition-all duration-300 cursor-pointer group"
+                >
+                  <div className="space-y-4">
+                    {/* Entry Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${getMoodColor(entry.mood)}`} />
+                          <span className="text-sm text-slate-400">
+                            {new Date(entry.createdAt).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <TypeIcon className="w-4 h-4 text-slate-400" />
+                        {entry.wordCount > 0 && <span className="text-xs text-slate-400">{entry.wordCount} words</span>}
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <TypeIcon className="w-4 h-4 text-slate-400" />
-                      {entry.wordCount > 0 && <span className="text-xs text-slate-400">{entry.wordCount} words</span>}
+                    {/* Entry Preview */}
+                    <div className="space-y-3">
+                      <p className="text-slate-200 leading-relaxed group-hover:text-slate-100 transition-colors">
+                        {entry.content.length > 200 ? entry.content.substring(0, 200) + '...' : entry.content}
+                      </p>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {entry.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full border border-slate-600/50"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Entry Preview */}
-                  <div className="space-y-3">
-                    <p className="text-slate-200 leading-relaxed group-hover:text-slate-100 transition-colors">
-                      {entry.preview}
-                    </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2">
-                      {entry.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-1 bg-slate-700/50 text-slate-300 rounded-full border border-slate-600/50"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            )
-          })}
+                </Card>
+              )
+            })
+          )}
         </div>
 
         {/* Empty State */}

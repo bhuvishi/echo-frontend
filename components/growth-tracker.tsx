@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, TrendingUp, Calendar, Heart, Sparkles } from "lucide-react"
+import { analyticsAPI, handleApiError } from "@/lib/api"
+import type { Analytics } from "@/lib/api"
 
 interface GrowthTrackerProps {
   onBack: () => void
@@ -11,8 +13,47 @@ interface GrowthTrackerProps {
 
 export function GrowthTracker({ onBack }: GrowthTrackerProps) {
   const [timeRange, setTimeRange] = useState<"week" | "month" | "3months" | "year">("month")
+  const [moodTimeline, setMoodTimeline] = useState<Analytics[]>([])
+  const [insights, setInsights] = useState<any[]>([])
+  const [timeCapsules, setTimeCapsules] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const spiritData = [
+  // Load analytics data on component mount
+  useEffect(() => {
+    const loadAnalyticsData = async () => {
+      try {
+        setLoading(true)
+        const [timeline, insightsData, capsules] = await Promise.all([
+          analyticsAPI.getMoodTimeline(7),
+          analyticsAPI.getInsights(),
+          analyticsAPI.getTimeCapsule(6)
+        ])
+        setMoodTimeline(timeline)
+        setInsights(insightsData)
+        setTimeCapsules(capsules)
+      } catch (err) {
+        console.error('Error loading analytics data:', err)
+        setError(handleApiError(err))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadAnalyticsData()
+  }, [])
+
+  // Convert analytics data to spirit data format
+  const spiritData = moodTimeline.map((day, index) => ({
+    date: day.date,
+    day: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
+    spirit: day.moodScore || 5,
+    label: getMoodLabel(day.moodScore || 5),
+    emoji: day.dailyMood || '😌'
+  }))
+
+  // Fallback data if API fails
+  const fallbackSpiritData = [
     { date: "2024-01-01", day: "Mon", spirit: 6, label: "Hopeful", emoji: "🌱" },
     { date: "2024-01-02", day: "Tue", spirit: 8, label: "Uplifted", emoji: "✨" },
     { date: "2024-01-03", day: "Wed", spirit: 4, label: "Contemplative", emoji: "🤔" },
@@ -22,7 +63,18 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
     { date: "2024-01-07", day: "Sun", spirit: 8, label: "Inspired", emoji: "🦋" },
   ]
 
-  const insights = [
+  const displaySpiritData = spiritData.length > 0 ? spiritData : fallbackSpiritData
+
+  function getMoodLabel(score: number): string {
+    if (score >= 9) return "Radiant"
+    if (score >= 7) return "Uplifted"
+    if (score >= 5) return "Balanced"
+    if (score >= 3) return "Contemplative"
+    return "Grounded"
+  }
+
+  // Use API insights or fallback data
+  const displayInsights = insights.length > 0 ? insights : [
     {
       title: "Your most reflective times",
       description: "You tend to journal most between 7-9 PM",
@@ -43,7 +95,7 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
     },
   ]
 
-  const timeCapsules = [
+  const displayTimeCapsules = timeCapsules.length > 0 ? timeCapsules : [
     {
       date: "1 year ago",
       prompt: "What does success mean to you?",
@@ -119,7 +171,7 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
 
                     {/* Spirit line chart */}
                     <div className="absolute inset-0 flex items-end justify-between px-2">
-                      {spiritData.map((day, index) => (
+                      {displaySpiritData.map((day, index) => (
                         <div key={index} className="flex flex-col items-center space-y-2 group cursor-pointer">
                           {/* Data point */}
                           <div className="relative">
@@ -162,9 +214,9 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        points={spiritData
+                        points={displaySpiritData
                           .map((day, index) => {
-                            const x = (index / (spiritData.length - 1)) * 100
+                            const x = (index / (displaySpiritData.length - 1)) * 100
                             const y = 100 - ((day.spirit - 1) / 9) * 100
                             return `${x}%,${y}%`
                           })
@@ -186,7 +238,7 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
 
         {/* Insights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {insights.map((insight, index) => (
+          {displayInsights.map((insight, index) => (
             <Card
               key={index}
               className={`p-6 bg-gradient-to-br opacity-100 shadow-xl bg-chart-3 text-muted rounded-xl ${insight.color} border backdrop-blur-sm hover:shadow-lg transition-all duration-300 border-secondary-foreground`}
@@ -218,7 +270,7 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
             </div>
 
             <div className="space-y-6">
-              {timeCapsules.map((capsule, index) => (
+              {displayTimeCapsules.map((capsule, index) => (
                 <Card key={index} className="p-6 border border-slate-700/50 backdrop-blur-sm bg-secondary-foreground text-foreground">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
