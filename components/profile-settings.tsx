@@ -238,3 +238,5 @@ export function ProfileSettings({ onBack }: ProfileSettingsProps) {
     </div>
   )
 }
+
+export { ProfileSettings }

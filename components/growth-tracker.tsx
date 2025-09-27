@@ -305,3 +305,5 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
     </div>
   )
 }
+
+export { GrowthTracker }
