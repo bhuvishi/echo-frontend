@@ -10,7 +10,10 @@
     "dev:full": "node start-dev.js",
     "backend": "cd backend && npm run dev",
     "backend:install": "cd backend && npm install",
-    "setup": "node setup.js"
+    "setup": "node setup.js",
+    "postbuild": "next-sitemap",
+    "analyze": "cross-env ANALYZE=true next build",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

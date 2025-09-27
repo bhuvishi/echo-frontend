@@ -76,7 +76,7 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
             <div className="flex items-center space-x-3">
               {isEvening ? <Moon className="w-6 h-6 text-indigo-300" /> : <Sun className="w-6 h-6 text-yellow-300" />}
               <h1 className="text-2xl font-bold text-slate-100 font-mono">
-                Good {isEvening ? "evening" : "morning"}, Bhuvishi
+                Good {isEvening ? "evening" : "morning"}
               </h1>
             </div>
             <p className="text-slate-400 font-mono text-sm">
