@@ -263,5 +263,3 @@ export function PastEntries({ onBack }: PastEntriesProps) {
     </div>
   )
 }
-
-export { PastEntries }
