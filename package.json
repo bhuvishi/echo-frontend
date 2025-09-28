@@ -11,7 +11,6 @@
     "backend": "cd backend && npm run dev",
     "backend:install": "cd backend && npm install",
     "setup": "node setup.js",
-    "postbuild": "next-sitemap",
     "analyze": "cross-env ANALYZE=true next build",
     "type-check": "tsc --noEmit"
   },
