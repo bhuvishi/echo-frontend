@@ -21,7 +21,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const steps = [
     {
-      //title: "Welcome to Echo Journal!",
+      title: "Welcome to Echo Journal!",
       subtitle: "Your thoughts, echoing through time",
       content: (
         <div className="text-center space-y-8">
@@ -102,33 +102,23 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <div className="grid grid-cols-1 gap-4">
             {[
               { value: "daily", label: "Daily", description: "Every day, building a strong habit", emoji: "🌅" },
-              {
-                value: "few-times-week",
-                label: "A few times a week",
-                description: "Regular but flexible",
-                emoji: "📝",
-              },
+              { value: "few-times-week", label: "A few times a week", description: "Regular but flexible", emoji: "📝" },
               { value: "weekly", label: "Weekly", description: "Once a week for deeper reflection", emoji: "🌙" },
-              {
-                value: "whenever",
-                label: "Whenever I feel like it",
-                description: "No pressure, just when inspired",
-                emoji: "✨",
-              },
+              { value: "whenever", label: "Whenever I feel like it", description: "No pressure, just when inspired", emoji: "✨" },
             ].map((option) => (
               <Card
                 key={option.value}
                 className={`p-4 cursor-pointer transition-all duration-300 border ${
                   preferences.frequency === option.value
-                    ? "bg-gradient-to-r from-teal-400/10 to-purple-400/10 border-teal-400/30 shadow-lg shadow-teal-400/10"
-                    : "bg-slate-800/30 border-slate-700/50 hover:bg-slate-700/30"
-                } backdrop-blur-sm`}
+                    ? "glass-button border-teal-400/50 shadow-lg shadow-teal-400/20"
+                    : "glass-effect hover:shadow-md"
+                }`}
                 onClick={() => setPreferences((prev) => ({ ...prev, frequency: option.value }))}
               >
-                <div className="flex items-center space-x-4">
-                  <div className="text-2xl">{option.emoji}</div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-slate-100">{option.label}</h4>
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{option.emoji}</span>
+                  <div>
+                    <p className="font-medium text-slate-100">{option.label}</p>
                     <p className="text-sm text-slate-400">{option.description}</p>
                   </div>
                 </div>
@@ -139,54 +129,56 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       ),
     },
     {
-      title: "When would you like gentle reminders?",
-      subtitle: "We'll help you build a consistent practice",
+      title: "Notification preferences",
+      subtitle: "How would you like to be reminded?",
       content: (
         <div className="space-y-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-center space-x-4">
-              <Clock className="w-6 h-6 text-teal-300" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Bell className="w-5 h-5 text-teal-300" />
+                <span className="text-lg font-medium text-slate-200">Daily reminders</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={preferences.notifications}
+                  onChange={(e) => setPreferences((prev) => ({ ...prev, notifications: e.target.checked }))}
+                />
+                <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-400"></div>
+              </label>
+            </div>
+          </div>
+
+          {preferences.notifications && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Clock className="w-5 h-5 text-teal-300" />
+                <span className="text-lg font-medium text-slate-200">Reminder time</span>
+              </div>
               <input
                 type="time"
                 value={preferences.reminderTime}
                 onChange={(e) => setPreferences((prev) => ({ ...prev, reminderTime: e.target.value }))}
-                className="bg-slate-800/50 border border-slate-600/50 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-400/50"
+                className="w-full p-3 bg-slate-700/30 border border-slate-600/50 rounded-lg text-slate-100 focus:border-teal-400/50 focus:outline-none"
               />
             </div>
-          </div>
-
-          <Card
-            className={`p-4 cursor-pointer transition-all duration-300 border ${
-              preferences.notifications
-                ? "bg-teal-400/10 border-teal-400/30 shadow-lg shadow-teal-400/10"
-                : "bg-slate-800/30 border-slate-700/50 hover:bg-slate-700/30"
-            } backdrop-blur-sm`}
-            onClick={() => setPreferences((prev) => ({ ...prev, notifications: !prev.notifications }))}
-          >
-            <div className="flex items-center space-x-3">
-              <Bell className="w-5 h-5 text-teal-300" />
-              <div>
-                <p className="font-medium text-slate-100">Smart reminders</p>
-                <p className="text-sm text-slate-400">We'll learn when you're most reflective</p>
-              </div>
-            </div>
-          </Card>
+          )}
         </div>
       ),
     },
     {
-      //title: "Your Aurora journey begins now",
-      title: "Ready to start reflecting?",
+      title: "You're all set!",
+      subtitle: "Ready to start your journaling journey?",
       content: (
-        <div className="text-center space-y-8">
-          <div className="w-32 h-32 mx-auto bg-gradient-to-br from-teal-400/20 to-purple-400/20 rounded-full flex items-center justify-center border border-slate-600/50">
-            <div className="w-20 h-20 bg-gradient-to-br from-teal-300/30 to-purple-300/30 rounded-full flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-teal-200" />
-            </div>
-          </div>
+        <div className="text-center space-y-6">
           <div className="space-y-4">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-teal-400/20 to-purple-400/20 rounded-full flex items-center justify-center border border-slate-600/50">
+              <Sparkles className="w-10 h-10 text-teal-300" />
+            </div>
             <h3 className="text-xl font-medium text-slate-200">Your first personalized prompt:</h3>
-            <Card className="p-6 bg-gradient-to-r from-teal-400/10 to-purple-400/10 border border-teal-400/20 backdrop-blur-sm text-foreground bg-chart-3">
+            <Card className="p-6 bg-gradient-to-r from-teal-400/10 to-purple-400/10 border border-teal-400/20 backdrop-blur-sm">
               <p className="text-lg text-slate-200 italic font-mono">
                 "What brought you joy today, and how did it make you feel in the moment?"
               </p>
@@ -198,9 +190,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   ]
 
   const nextStep = () => {
+    console.log("Next step clicked, currentStep:", currentStep, "steps.length:", steps.length)
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
+      console.log("Calling onComplete()")
       onComplete()
     }
   }
@@ -210,6 +204,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       setCurrentStep(currentStep - 1)
     }
   }
+
+  console.log("OnboardingFlow render - currentStep:", currentStep, "total steps:", steps.length)
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

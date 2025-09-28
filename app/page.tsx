@@ -16,11 +16,9 @@ export default function EchoJournal() {
 
   // Check if onboarding was completed previously
   useEffect(() => {
-    const completed = localStorage.getItem('echo-onboarding-complete')
-    if (completed === 'true') {
-      setIsOnboardingComplete(true)
-      setCurrentScreen("dashboard")
-    }
+    // Clear any existing onboarding completion to allow testing
+    localStorage.removeItem('echo-onboarding-complete')
+    console.log("Onboarding localStorage cleared for testing")
   }, [])
 
   const handleOnboardingComplete = () => {
