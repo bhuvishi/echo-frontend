@@ -223,6 +223,47 @@ export function MainDashboard({ onNavigate }: MainDashboardProps) {
           </Card>
         </div>
 
+        {/* Smart Reminder Feature */}
+        <Card className="p-6 glass-effect shadow-lg">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-100">Smart Reminders</h3>
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-full flex items-center justify-center border border-yellow-400/30">
+                <Sparkles className="w-4 h-4 text-yellow-300" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-slate-300">Daily Check-in</h4>
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-slate-400">8:00 PM - Your reflection time</span>
+                </div>
+                <p className="text-xs text-slate-500">Based on your most productive journaling times</p>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-slate-300">Weekly Reflection</h4>
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                  <span className="text-sm text-slate-400">Sundays - Growth review</span>
+                </div>
+                <p className="text-xs text-slate-500">Time to see how you've grown</p>
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t border-slate-600/30">
+              <Button 
+                variant="outline" 
+                className="w-full border-slate-600/50 text-slate-300 hover:bg-slate-700/30"
+              >
+                Customize Reminders
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         {/* Secondary Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card

@@ -292,6 +292,10 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
                     <Button
                       variant="outline"
                       className="w-full border-teal-400/30 text-teal-300 hover:bg-teal-400/10 bg-transparent"
+                      onClick={() => {
+                        // Open reflection modal or navigate to writing interface
+                        alert(`Time Capsule Reflection\n\nPrompt: "${capsule.prompt}"\n\nYour past response: "${capsule.oldResponse}"\n\nHow do you feel about this now? Take a moment to reflect on how your perspective has changed.`)
+                      }}
                     >
                       Reflect on this
                     </Button>
@@ -305,3 +309,5 @@ export function GrowthTracker({ onBack }: GrowthTrackerProps) {
     </div>
   )
 }
+
+export { GrowthTracker }

@@ -196,6 +196,10 @@ export function PastEntries({ onBack }: PastEntriesProps) {
                 <Card
                   key={entry._id}
                   className="p-6 bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm hover:bg-slate-700/30 transition-all duration-300 cursor-pointer group"
+                  onClick={() => {
+                    // Open entry in a modal or navigate to detailed view
+                    alert(`Opening entry: "${entry.title || 'Untitled'}"\n\n${entry.content}\n\nMood: ${entry.mood}\nTags: ${entry.tags.join(', ')}`)
+                  }}
                 >
                   <div className="space-y-4">
                     {/* Entry Header */}
@@ -236,6 +240,16 @@ export function PastEntries({ onBack }: PastEntriesProps) {
                             #{tag}
                           </span>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* Click to read more indicator */}
+                    <div className="pt-2 border-t border-slate-600/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">Click to read full entry</span>
+                        <div className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                          {entry.mood} • {entry.entryType}
+                        </div>
                       </div>
                     </div>
                   </div>
